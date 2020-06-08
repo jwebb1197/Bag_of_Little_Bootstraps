@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Julia Webb" />
+
+<meta name="date" content="2020-06-04" />
+
+<title>Bag of Little Bootstraps</title>
+
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css" data-origin="pandoc">
+a.sourceLine { display: inline-block; line-height: 1.25; }
+a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
+a.sourceLine:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+a.sourceLine { text-indent: -1em; padding-left: 1em; }
+}
+pre.numberSource a.sourceLine
+  { position: relative; left: -4em; }
+pre.numberSource a.sourceLine::before
+  { content: attr(title);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; pointer-events: all; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {  }
+@media screen {
+a.sourceLine::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    for (var j = 0; j < rules.length; j++) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Bag of Little Bootstraps</h1>
+<h4 class="author">Julia Webb</h4>
+<h4 class="date">June 4, 2020</h4>
+
+
+
+<style>
+.math {
+  font-size:small;
+}
+</style>
+<div id="description" class="section level2">
+<h2>Description</h2>
+<p>Bag of Little Bootstraps (blb) allows users to utilize bootstrapping to create regression models, specifically linear regression models or logistic regression models. Users are also given the option to use more than one CPU when fitting a model to the data. Note, if users wish to utilize this parallelization feature, they first must run <code>furrr::plan(multisession, worker = cl)</code> in the console (<code>cl</code> being the number of CPU’s they wish to use.)</p>
+<p>The library has two main functions, each of which come with a set of methods.</p>
+
+</div>
+<div id="functions-and-methods" class="section level2">
+<h2>Functions and Methods</h2>
+<div id="functions" class="section level5">
+<h5>Functions</h5>
+<ol style="list-style-type: decimal">
+<li><p><code>blblm(formula, data, m = 10, B = 5000, parallel = FALSE, cl = NULL)</code> : Utilize bootsrapping to fit a linear regression model, to the data as specified in the data argument. If <code>parallel = TRUE</code>, then parallelization is used. Then the user can define the number of desired number CPUs in the <code>cl</code> argument. However, as noted in the description, the user must run <code>furrr::plan(multisession, worker = cl)</code> in the console before using this parallelization feature. The arguments <code>B</code> and <code>m</code> are the number of bootstrapped samples, and the number of sugroups in which to split the data during the bootstrapping process.</p>
+<ul>
+<li>Methods:
+<ul>
+<li><p><code>print(x, ...)</code> : Prints the model in the form of <span class="math inline">\(Y\)</span> ~ <span class="math inline">\(X_{1}\)</span> + <span class="math inline">\(X_{2}\)</span></p></li>
+<li><p><code>sigma(object, confidence = FALSE, level = 0.95, ...)</code>: Returns estimate of <span class="math inline">\(\sigma\)</span>, the standard deviation of the errors. If <code>confidence = TRUE</code>, then a confidence interval of is <span class="math inline">\(\sigma\)</span> included in the output. The default confidence level is 95%, and this can be changed using the <code>level</code> argument.</p></li>
+<li><p><code>coef(object, ...)</code>: Returns a numeric vector containing the coefficients of the parameters in the model. For example, in the model <span class="math inline">\(Y\)</span> ~ <span class="math inline">\(B_{1}X_{1} + B_{2}X_{2}\)</span>, this function would return a numeric vector containing <span class="math inline">\(B_{1}\)</span> and <span class="math inline">\(B_{2}\)</span>.</p></li>
+<li><p><code>confint(object, parm = NULL, level = 0.95, ...)</code>: By default, returns 95% confidence intervals for each parameter in the model (the predictor variables). User can request specific parameters using the <code>parm</code> argument, and can change the confidence level using the <code>level</code> argument.</p></li>
+<li><p><code>predict(object, new_data, confidence = FALSE, level = 0.95, ...)</code>: Utilize the model to predict the response values of a new dataset. If <code>confidence = TRUE</code> a n <span class="math inline">\(x\)</span> 3 matrix is returned in which the first column is a the predicted value, and the second and third rows are the lower and upper endpoints of the corresponding 95% confidence interval for that prediction. The user can change the confidence level with the <code>level</code> argument.</p></li>
+</ul></li>
+</ul></li>
+<li><p><code>blb_logreg(formula, data, m = 10, B = 5000, parallel = FALSE, cl = NULL)</code>: Utilize bootsrapping to fit a logistic regression model, to the data as specified in the data argument. If <code>parallel = TRUE</code>, then parallelization is used. Then the user can define the number of desired number CPUs in the <code>cl</code> argument. However, as noted in the description, the user must run <code>furrr::plan(multisession, worker = cl)</code> in the console before using this parallelization feature. The arguments <code>B</code> and <code>m</code> are the number of bootstrapped samples, and the number of sugroups in which to split the data during the bootstrapping process.</p>
+<ul>
+<li><p>Methods:</p>
+<ul>
+<li><p><code>print(x, ...)</code>: Prints the model in the form of <span class="math inline">\(Y\)</span> ~ <span class="math inline">\(X_{1}\)</span> + <span class="math inline">\(X_{2}\)</span>. Note, this is not the equation used to calculate the data, as we are using logistic regression. However, given that we have p parameters, the log-odds of a given observation is equal to <span class="math inline">\(B_{1}X_{1} + B_{2}X_{2}\)</span> + … + <span class="math inline">\(B_{p}X_{p}\)</span>.</p></li>
+<li><p><code>coef(object, ...)</code>: Returns a numeric vector containing the coefficients of the parameters in the model. For example, if the log-odds were equal to <span class="math inline">\(B_{1}X_{1} + B_{2}X_{2}\)</span>, this function would return a numeric vector containing <span class="math inline">\(B_{1}\)</span> and <span class="math inline">\(B_{2}\)</span>.</p></li>
+<li><p><code>confint(object, parm = NULL, level = 0.95, ...)</code>: By default, returns 95% confidence intervals for each parameter in the model (the predictor variables). User can request specific parameters using the <code>parm</code> argument, and can change the confidence level using the <code>level</code> argument.</p></li>
+<li><p><code>predict(object, new_data, p = FALSE,...)</code>: Utilize the model to predict the response values of a new dataset. If <code>p = TRUE</code>, then the function returns P(Y = 1|X = x), instead of binary {0,1} prediction.</p></li>
+</ul></li>
+</ul></li>
+</ol>
+
+</div>
+</div>
+<div id="examples" class="section level2">
+<h2>Examples</h2>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" title="1"><span class="kw">library</span>(blb)</a></code></pre></div>
+<div id="examples-concerning-blblm" class="section level5">
+<h5>Examples concerning <code>blblm()</code></h5>
+<p>We will use the iris dataset from the dataset library. See following link for more information. <a href="https://www.rdocumentation.org/packages/datasets/versions/3.6.2/topics/iris" class="uri">https://www.rdocumentation.org/packages/datasets/versions/3.6.2/topics/iris</a></p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" title="1"><span class="kw">library</span>(datasets)</a>
+<a class="sourceLine" id="cb2-2" title="2"><span class="kw">data</span>(iris)</a>
+<a class="sourceLine" id="cb2-3" title="3"></a>
+<a class="sourceLine" id="cb2-4" title="4">train =<span class="st"> </span>iris[<span class="dv">1</span><span class="op">:</span><span class="dv">75</span>,]</a>
+<a class="sourceLine" id="cb2-5" title="5">test =<span class="st"> </span>iris[<span class="dv">76</span><span class="op">:</span><span class="dv">150</span>,]</a></code></pre></div>
+<p>Example 1: <code>blblm()</code></p>
+<ul>
+<li>default:</li>
+</ul>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" title="1">fit =<span class="st"> </span><span class="kw">blblm</span>(Sepal.Length <span class="op">~</span><span class="st"> </span>Sepal.Width <span class="op">+</span><span class="st"> </span>Petal.Length <span class="op">+</span><span class="st"> </span>Petal.Width, <span class="dt">data =</span> train)</a></code></pre></div>
+<ul>
+<li>change values of <code>m</code>, <code>B</code>, <code>parallel</code>, <code>cl</code></li>
+</ul>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" title="1">fit =<span class="st"> </span><span class="kw">blblm</span>(Sepal.Length <span class="op">~</span><span class="st"> </span>Sepal.Width <span class="op">+</span><span class="st"> </span>Petal.Length <span class="op">+</span><span class="st"> </span>Petal.Width, <span class="dt">data =</span> train, <span class="dt">m =</span> <span class="dv">8</span>, <span class="dt">B =</span> <span class="dv">100</span>, <span class="dt">parallel =</span> <span class="ot">TRUE</span>, <span class="dt">cl =</span> <span class="dv">4</span>)</a></code></pre></div>
+
+<p>Example 2: <code>print()</code> method:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" title="1"><span class="kw">print</span>(fit)</a>
+<a class="sourceLine" id="cb5-2" title="2"><span class="co">#&gt; blblm model: Sepal.Length ~ Sepal.Width + Petal.Length + Petal.Width</span></a></code></pre></div>
+
+<p>Example 3: <code>sigma()</code> method</p>
+<p>*default</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" title="1"><span class="kw">sigma</span>(fit)</a>
+<a class="sourceLine" id="cb6-2" title="2"><span class="co">#&gt; [1] 0.1812761</span></a></code></pre></div>
+<ul>
+<li>including a 90% confidence interval</li>
+</ul>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" title="1"><span class="kw">sigma</span>(fit, <span class="dt">confidence =</span> <span class="ot">TRUE</span>, <span class="dt">level =</span> <span class="fl">0.9</span>)</a>
+<a class="sourceLine" id="cb7-2" title="2"><span class="co">#&gt;     sigma       lwr       upr </span></a>
+<a class="sourceLine" id="cb7-3" title="3"><span class="co">#&gt; 0.1812761 0.1534739 0.2034917</span></a></code></pre></div>
+
+<p>Example 4: <code>coef()</code> method</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb8-1" title="1"><span class="kw">coef</span>(fit)</a>
+<a class="sourceLine" id="cb8-2" title="2"><span class="co">#&gt;  (Intercept)  Sepal.Width Petal.Length  Petal.Width </span></a>
+<a class="sourceLine" id="cb8-3" title="3"><span class="co">#&gt;    1.9987605    0.6844338    0.3945559    0.3549042</span></a></code></pre></div>
+
+<p>Example 5: <code>confint()</code></p>
+<ul>
+<li>default</li>
+</ul>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" title="1"><span class="kw">confint</span>(fit)</a>
+<a class="sourceLine" id="cb9-2" title="2"><span class="co">#&gt;                    2.5%     97.5%</span></a>
+<a class="sourceLine" id="cb9-3" title="3"><span class="co">#&gt; Sepal.Width   0.5334892 0.8226138</span></a>
+<a class="sourceLine" id="cb9-4" title="4"><span class="co">#&gt; Petal.Length  0.1636789 0.6203422</span></a>
+<a class="sourceLine" id="cb9-5" title="5"><span class="co">#&gt; Petal.Width  -0.1890187 0.8939789</span></a></code></pre></div>
+<ul>
+<li>specify parameters, change confidence level to 90%</li>
+</ul>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb10-1" title="1"><span class="kw">confint</span>(fit, <span class="dt">parm =</span> <span class="st">&quot;Sepal.Width&quot;</span>, <span class="dt">level =</span> <span class="fl">0.90</span>)</a>
+<a class="sourceLine" id="cb10-2" title="2"><span class="co">#&gt;                    5%       95%</span></a>
+<a class="sourceLine" id="cb10-3" title="3"><span class="co">#&gt; Sepal.Width 0.5617386 0.8039654</span></a>
+<a class="sourceLine" id="cb10-4" title="4"></a>
+<a class="sourceLine" id="cb10-5" title="5"></a>
+<a class="sourceLine" id="cb10-6" title="6"></a>
+<a class="sourceLine" id="cb10-7" title="7"><span class="kw">confint</span>(fit, <span class="dt">parm =</span> <span class="kw">c</span>(<span class="st">&quot;Sepal.Width&quot;</span>, <span class="st">&quot;Petal.Width&quot;</span>), <span class="dt">level =</span> <span class="fl">0.90</span>)</a>
+<a class="sourceLine" id="cb10-8" title="8"><span class="co">#&gt;                     5%       95%</span></a>
+<a class="sourceLine" id="cb10-9" title="9"><span class="co">#&gt; Sepal.Width  0.5617386 0.8039654</span></a>
+<a class="sourceLine" id="cb10-10" title="10"><span class="co">#&gt; Petal.Width -0.1049739 0.8150423</span></a></code></pre></div>
+<p>Example 6: <code>predict()</code></p>
+<p>*default</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb11-1" title="1">predicted_values =<span class="st"> </span><span class="kw">predict</span>(fit, test)</a>
+<a class="sourceLine" id="cb11-2" title="2"><span class="kw">head</span>(predicted_values)</a>
+<a class="sourceLine" id="cb11-3" title="3"><span class="co">#&gt;       76       77       78       79       80       81 </span></a>
+<a class="sourceLine" id="cb11-4" title="4"><span class="co">#&gt; 6.284974 6.305909 6.628179 6.291476 5.514138 5.531109</span></a></code></pre></div>
+<ul>
+<li><code>confidence = TRUE</code>, change confidence level to 90%</li>
+</ul>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb12-1" title="1">predicted_values =<span class="st"> </span><span class="kw">predict</span>(fit, test, <span class="dt">confidence =</span> <span class="ot">TRUE</span>, <span class="dt">level =</span> <span class="fl">0.90</span>)</a>
+<a class="sourceLine" id="cb12-2" title="2"><span class="kw">head</span>(predicted_values)</a>
+<a class="sourceLine" id="cb12-3" title="3"><span class="co">#&gt;         fit      lwr      upr</span></a>
+<a class="sourceLine" id="cb12-4" title="4"><span class="co">#&gt; 76 6.284974 6.206414 6.357957</span></a>
+<a class="sourceLine" id="cb12-5" title="5"><span class="co">#&gt; 77 6.305909 6.183440 6.419429</span></a>
+<a class="sourceLine" id="cb12-6" title="6"><span class="co">#&gt; 78 6.628179 6.530522 6.724816</span></a>
+<a class="sourceLine" id="cb12-7" title="7"><span class="co">#&gt; 79 6.291476 6.213761 6.371833</span></a>
+<a class="sourceLine" id="cb12-8" title="8"><span class="co">#&gt; 80 5.514138 5.445258 5.584121</span></a>
+<a class="sourceLine" id="cb12-9" title="9"><span class="co">#&gt; 81 5.531109 5.444435 5.619716</span></a></code></pre></div>
+</div>
+<div id="examples-concerning-blb_logreg" class="section level5">
+<h5>Examples concerning <code>blb_logreg()</code></h5>
+<p>We will use data from the <code>titanic</code> library. See following link for more information. <a href="https://www.rdocumentation.org/packages/titanic/versions/0.1.0" class="uri">https://www.rdocumentation.org/packages/titanic/versions/0.1.0</a></p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb13-1" title="1"><span class="kw">library</span>(titanic)</a>
+<a class="sourceLine" id="cb13-2" title="2"></a>
+<a class="sourceLine" id="cb13-3" title="3">train =<span class="st"> </span>titanic_train[<span class="dv">1</span><span class="op">:</span><span class="dv">550</span>,]</a>
+<a class="sourceLine" id="cb13-4" title="4">test =<span class="st"> </span>titanic_train[<span class="dv">551</span><span class="op">:</span><span class="dv">891</span>,]</a></code></pre></div>
+<p>Example 1: <code>blb_logreg()</code></p>
+<ul>
+<li>default</li>
+</ul>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb14-1" title="1">fit_logreg =<span class="st"> </span><span class="kw">blb_logreg</span>(Survived <span class="op">~</span><span class="st"> </span>Age <span class="op">+</span><span class="st"> </span>Sex <span class="op">+</span><span class="st"> </span>Pclass, <span class="dt">data =</span> train)</a>
+<a class="sourceLine" id="cb14-2" title="2">fit_logreg</a>
+<a class="sourceLine" id="cb14-3" title="3"><span class="co">#&gt; blb_logreg model: Survived ~ Age + Sex + Pclass</span></a></code></pre></div>
+<ul>
+<li>change values of <code>m</code>, <code>B</code>, <code>parallel</code>, <code>cl</code></li>
+</ul>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb15-1" title="1">fit_logreg =<span class="st"> </span><span class="kw">blb_logreg</span>(Survived <span class="op">~</span><span class="st"> </span>Age <span class="op">+</span><span class="st"> </span>Sex <span class="op">+</span><span class="st"> </span>Pclass, <span class="dt">data =</span> train, <span class="dt">m =</span> <span class="dv">8</span>, <span class="dt">B =</span> <span class="dv">100</span>, <span class="dt">parallel =</span> <span class="ot">TRUE</span>, <span class="dt">cl =</span> <span class="dv">4</span>)</a>
+<a class="sourceLine" id="cb15-2" title="2">fit_logreg</a>
+<a class="sourceLine" id="cb15-3" title="3"><span class="co">#&gt; blb_logreg model: Survived ~ Age + Sex + Pclass</span></a></code></pre></div>
+
+<p>Example 2: <code>print()</code> method</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb16-1" title="1"><span class="kw">print</span>(fit_logreg)</a>
+<a class="sourceLine" id="cb16-2" title="2"><span class="co">#&gt; blb_logreg model: Survived ~ Age + Sex + Pclass</span></a></code></pre></div>
+
+<p>Example 2: <code>coef()</code> method</p>
+<ul>
+<li>Note: The <code>Sex</code> parameter can take on values in {Male, Female}. The blb_logreg() converts <code>Sex</code> to a binary variable , <code>Sexmale</code>, such that <code>Sexmale = 1</code> if <code>Sex = Male</code>, and <code>Sexmale = 0</code> if <code>Sex = Female</code>.</li>
+</ul>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb17-1" title="1"><span class="kw">coef</span>(fit_logreg)</a>
+<a class="sourceLine" id="cb17-2" title="2"><span class="co">#&gt; (Intercept)         Age     Sexmale      Pclass </span></a>
+<a class="sourceLine" id="cb17-3" title="3"><span class="co">#&gt;  6.34883185 -0.05863577 -3.37289669 -1.45354566</span></a></code></pre></div>
+
+<p>Example 3: <code>confint()</code> method</p>
+<ul>
+<li><p>Note the use of <code>Sexmale</code> instead of original parameter <code>Sex</code>. See Example 2 for explanation.</p></li>
+<li><p>default output:</p></li>
+</ul>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb18-1" title="1"><span class="kw">confint</span>(fit_logreg)</a>
+<a class="sourceLine" id="cb18-2" title="2"><span class="co">#&gt;                2.5%       97.5%</span></a>
+<a class="sourceLine" id="cb18-3" title="3"><span class="co">#&gt; Age     -0.08586784 -0.03531921</span></a>
+<a class="sourceLine" id="cb18-4" title="4"><span class="co">#&gt; Sexmale -4.28288567 -2.69719194</span></a>
+<a class="sourceLine" id="cb18-5" title="5"><span class="co">#&gt; Pclass  -1.99268247 -1.02421440</span></a></code></pre></div>
+<ul>
+<li>specify parameters with <code>parm</code> argument, and change confidence level to 90%</li>
+</ul>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb19-1" title="1"><span class="kw">confint</span>(fit_logreg, <span class="dt">parm =</span> <span class="kw">c</span>(<span class="st">&quot;Age&quot;</span>, <span class="st">&quot;Sexmale&quot;</span>), <span class="dt">level =</span> <span class="fl">0.9</span>)</a>
+<a class="sourceLine" id="cb19-2" title="2"><span class="co">#&gt;                  5%         95%</span></a>
+<a class="sourceLine" id="cb19-3" title="3"><span class="co">#&gt; Age     -0.08064267 -0.03881982</span></a>
+<a class="sourceLine" id="cb19-4" title="4"><span class="co">#&gt; Sexmale -4.14364135 -2.74917078</span></a>
+<a class="sourceLine" id="cb19-5" title="5"></a>
+<a class="sourceLine" id="cb19-6" title="6"></a>
+<a class="sourceLine" id="cb19-7" title="7"></a>
+<a class="sourceLine" id="cb19-8" title="8"><span class="kw">confint</span>(fit_logreg, <span class="dt">parm =</span> <span class="kw">c</span>(<span class="st">&quot;Age&quot;</span>), <span class="dt">level =</span> <span class="fl">0.9</span>)</a>
+<a class="sourceLine" id="cb19-9" title="9"><span class="co">#&gt;              5%         95%</span></a>
+<a class="sourceLine" id="cb19-10" title="10"><span class="co">#&gt; Age -0.08064267 -0.03881982</span></a></code></pre></div>
+<p>Example 4: <code>predict()</code> method</p>
+<ul>
+<li>default output</li>
+</ul>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb20-1" title="1">predicted_values =<span class="st"> </span><span class="kw">predict</span>(fit_logreg, test)</a>
+<a class="sourceLine" id="cb20-2" title="2"><span class="kw">head</span>(predicted_values)</a>
+<a class="sourceLine" id="cb20-3" title="3"><span class="co">#&gt; 551 552 554 555 556 557 </span></a>
+<a class="sourceLine" id="cb20-4" title="4"><span class="co">#&gt;   1   0   0   1   0   1</span></a></code></pre></div>
+<ul>
+<li><code>p = TRUE</code></li>
+</ul>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb21-1" title="1">predicted_values =<span class="st"> </span><span class="kw">predict</span>(fit_logreg, test, <span class="dt">p =</span> <span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb21-2" title="2"><span class="kw">head</span>(predicted_values)</a>
+<a class="sourceLine" id="cb21-3" title="3"><span class="co">#&gt;        551        552        554        555        556        557 </span></a>
+<a class="sourceLine" id="cb21-4" title="4"><span class="co">#&gt; 0.62845197 0.18029918 0.06448354 0.66779034 0.10783700 0.88901997</span></a></code></pre></div>
+</div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
