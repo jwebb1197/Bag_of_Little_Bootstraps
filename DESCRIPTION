@@ -1,0 +1,29 @@
+Package: blb
+Title: Bag of Little Bootstraps
+Version: 0.0.0.9000
+Authors@R: 
+    person(given = "Julia",
+           family = "Webb",
+           role = c("aut", "cre"),
+           email = "jdwebb@ucdavis.edu"
+           )
+Description: Bag of Little Bootstraps (blb) allows users to utilize bootstrapping to create regression models, specifically linear regression
+  models or logistic regression models. Users are also given the option to use more than one CPU when fitting a model to the data. Note,
+  if users wish to utilize this parallelization feature, they first must run furrr::plan(multisession, worker = cl) in the console (cl being
+  the number of CPU's they wish to use.)
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.1.0
+Suggests: 
+    knitr,
+    rmarkdown,
+    testthat (>= 2.1.0)
+VignetteBuilder: knitr
+Imports: 
+    purrr,
+    magrittr,
+    utils,
+    titanic,
+    MASS,
+    datasets
